@@ -8,6 +8,7 @@ void Counter::update(const Token &token)
     {
         case TokenType::Keyword:                    count_keyword++;                    return;
         case TokenType::Identifier:                 count_identifier++;                 return;
+        case TokenType::FaultyIdentifier:           count_faulty_identifier++;           return;       
         case TokenType::NumericConstant:            count_numeric_constant++;            return;
         case TokenType::NumericConstantWithError:   count_numeric_constant_with_error++;   return;
         case TokenType::CharacterConstant:          count_character_constant++;          return;
@@ -24,6 +25,7 @@ std::ostream& operator<<(std::ostream& os, const Counter & counter)
 {
     os << "KeyWord"  << ":\t" << counter.get_keyword() << std::endl;
     os << "Identifier"  << ":\t" << counter.get_identifier() << std::endl;
+    os << "FaultyIdentifier"  << ":\t" << counter.get_faulty_identifier() << std::endl;
     os << "NumericConstant"  << ":\t" << counter.get_numeric_constant() << std::endl;
     os << "NumericConstant(Error Detected)"  << ":\t" << counter.get_numeric_constantWithError() << std::endl;
     os << "CharacterConstant"  << ":\t" << counter.get_character_constant() << std::endl;

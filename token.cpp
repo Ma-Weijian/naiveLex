@@ -4,6 +4,7 @@ const char *toTokenString(TokenType token_type) {
     switch (token_type) {
         case TokenType::Keyword:                    return "KeyWord";
         case TokenType::Identifier:                 return "Identifier";
+        case TokenType::FaultyIdentifier:           return "FaultyIdentifier";
         case TokenType::NumericConstant:            return "NumericConstant";
         case TokenType::NumericConstantWithError:   return "NumericConstantWithError";
         case TokenType::CharacterConstant:          return "CharacterConstant";
@@ -113,6 +114,29 @@ std::string Token::toStr() const {
             result += std::string(toPunctuatorString(this->punctuator_));
             break;
         case TokenType::EndOfFile:
+            break;
+        case TokenType::NumericConstantWithError:
+            result += this->literalValue_ + this->redundant_part_;
+            result += "\nA numeric constant error occurs here.\n";
+            result += "We think the right value should be: ";
+            result += this->literalValue_;
+            result += "\nWe tried to identify most of the chars in this faulty numeric constant.\n";
+            result += "The remaining part and the part identified may be of something else but we chose this recognition at this time.\n";
+            result += "The suffix are neglected and subsequent modification of source code is required.\n";
+            break;
+        case TokenType::FaultyIdentifier:
+            result += this->redundant_part_ + this->literalValue_;
+            result += "\nAn identifier error occurs here.\n";
+            result += "We think the right value should be ";
+            result += this->literalValue_;
+            result += "\nWe tried to identify most of the chars in this faulty identifier.\n";
+            result += "The previous part and the part remained may be of something else but we chose this recognition at this time.\n";
+            result += "The illegal prefix are neglected and subsequent modification of source code is required.\n";
+            break;
+        case TokenType::Unknown:
+            result += this->literalValue_;
+            result += "\nAn unknown value emerges here.\n";
+            result += "We don't konw how to fix it but we think you may well delete this token.\n";
             break;
         default:
             result += this->literalValue_;

@@ -1,6 +1,6 @@
 #include "lexer.h"
 
-Token naiveLex::getNextToken() 
+Token naiveLex::getNextToken(TokenType prev_type) 
 {
     /* refresh the bufffer. */
     tokenBuffer_.clear();
@@ -10,6 +10,7 @@ Token naiveLex::getNextToken()
     
     /* get a char and judge if it is in the token. */
     auto c = fileWrapper_.getNextChar();
+    /* This while skips all blank chars and get the following nonblank one. */
     while(isblank(c) || c == '\n')
     {
         if(fileWrapper_.eof())
@@ -35,7 +36,7 @@ Token naiveLex::getNextToken()
             else if(isdigit(fileWrapper_.peekChar(1)))
             {
                 tokenBuffer_.push_back(c);
-                return get_next_numeric_token();                                        //.85e+8
+                return get_next_numeric_token(prev_type);                                        //.85e+8
             }
             else
                 return Token(TokenType::Punctuator, currentLocation_, Punctuator::Period);
@@ -106,13 +107,13 @@ Token naiveLex::getNextToken()
             {
                 fileWrapper_.eatChars(1);
                 skip_line_comment();
-                return getNextToken();
+                return getNextToken(prev_type);
             } 
             else if(fileWrapper_.peekChar(1) == '*')
             {
                 fileWrapper_.eatChars(1);
                 skip_block_comment();
-                return getNextToken();
+                return getNextToken(prev_type);
             } 
             else if(fileWrapper_.peekChar(1) == '=')
             {
@@ -129,7 +130,7 @@ Token naiveLex::getNextToken()
             }
             else if(fileWrapper_.peekChar(1) == '>')
             {
-                fileWrapper_.eatChars(1);
+                fileWrapper_ .eatChars(1);
                 return Token(TokenType::Punctuator, currentLocation_, Punctuator::RBrace);
             } 
             else if(fileWrapper_.peekChar(1) == ':')
@@ -229,7 +230,7 @@ Token naiveLex::getNextToken()
                     return Token(TokenType::Punctuator, currentLocation_, Punctuator::Pipe);
             }
         }
-        case '?':               return Token(TokenType::Punctuator, currentLocation_, Punctuator::Question);
+        case '?':           return Token(TokenType::Punctuator, currentLocation_, Punctuator::Question);
         case ':':
             if(fileWrapper_.peekChar(1) == '>') 
             {
@@ -259,7 +260,7 @@ Token naiveLex::getNextToken()
         case '0': case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9':
             tokenBuffer_.push_back(c);
-            return get_next_numeric_token();
+            return get_next_numeric_token(prev_type);
         case 'L':
         case 'U':
             if(fileWrapper_.peekChar(1) == '\"') 
@@ -367,7 +368,13 @@ bool isPermittedNumericSuffix(const char c1, const char c2, const char c3)
     return ((c1 == 'u' || c1 == 'U') && ((c2 == 'L' && c3 == 'L') || (c2 == 'l' && c3 == 'l')));
 }
 
-Token naiveLex::get_next_numeric_token() 
+bool isLegalAfterNum(char c)
+{
+    return isspace(c) || c == EOF || c == '-' || c == '-' || c == '+' || c == '&' || c == '*' || c == '/' || c == '%' || \
+            c == '>' || c == '<' || c == '=' || c == '^' || c == '|' || c == '?' || c == ':' || c == ';' || c == ',' || c == ']' || c == ')';
+}
+
+Token naiveLex::get_next_numeric_token(TokenType prev_type) 
 {
     while(!fileWrapper_.eof() && isPermittedNumericToken(fileWrapper_.peekChar(1))) 
     {
@@ -379,6 +386,13 @@ Token naiveLex::get_next_numeric_token()
                 }
         tokenBuffer_.push_back(fileWrapper_.getNextChar());
     }
+
+    std::string faulty_suffix;
+    while (!isLegalAfterNum(fileWrapper_.peekChar(1)))
+    {
+        faulty_suffix.push_back(fileWrapper_.getNextChar());
+    }
+     
     size_t offset;
     std::stof(tokenBuffer_, &offset);
     if(offset == tokenBuffer_.size() ||
@@ -386,9 +400,13 @@ Token naiveLex::get_next_numeric_token()
             (offset + 2 == tokenBuffer_.size() && isPermittedNumericSuffix(tokenBuffer_.at(offset), tokenBuffer_.at(offset + 1))) ||
                 (offset + 3 == tokenBuffer_.size() && isPermittedNumericSuffix(tokenBuffer_.at(offset), tokenBuffer_.at(offset + 1), tokenBuffer_.at(offset + 2)))) 
                 {
-                    return Token(TokenType::NumericConstant, currentLocation_, tokenBuffer_);
+                    if(faulty_suffix.empty())
+                        return Token(TokenType::NumericConstant, currentLocation_, tokenBuffer_);
                 }
-    return Token(TokenType::NumericConstantWithError, currentLocation_, tokenBuffer_);
+    if(prev_type == TokenType::Keyword)
+        return Token(TokenType::FaultyIdentifier, currentLocation_, tokenBuffer_, faulty_suffix);      //We first move them in and do the handling later.
+    else
+        return Token(TokenType::NumericConstantWithError, currentLocation_, tokenBuffer_, faulty_suffix);
 }
 
 /* We scan until the next \" */

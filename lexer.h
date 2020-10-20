@@ -9,7 +9,7 @@
 class naiveLex {
     void skip_line_comment();
     void skip_block_comment();
-    Token get_next_numeric_token();
+    Token get_next_numeric_token(TokenType prev_type);
     Token get_next_string_literial_token();
     Token get_next_character_constant_token();
     Token get_next_identifier_token();
@@ -19,7 +19,7 @@ class naiveLex {
     std::string tokenBuffer_;
 public:
     explicit naiveLex(const std::string& fileName) : fileWrapper_{fileName} {}
-    Token getNextToken();
+    Token getNextToken(TokenType prev_type);
     size_t getCount(){          return fileWrapper_.getCount();        }
     size_t getLineCount(){      return fileWrapper_.getLineCount();    }
     std::string getSrcName(){   return fileWrapper_.getName();         }
