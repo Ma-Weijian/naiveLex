@@ -1,0 +1,82 @@
+Tokens:
+Type: PreprocessingDirective		Location: ./example_programs/correct.c:1:1		Value: include <stdio.h>
+Type: PreprocessingDirective		Location: ./example_programs/correct.c:3:1		Value:  define FOO(A, B, ..., format, ...) \
+if(X == Y) { \
+    fprintf(stderr, format __W32API_MAJOR_VERSION(,) __ARGS__); \
+}
+Type: KeyWord		Location: ./example_programs/correct.c:8:1		Value: char
+Type: Identifier		Location: ./example_programs/correct.c:8:6		Value: str
+Type: Punctuator		Location: ./example_programs/correct.c:8:9		Value: [
+Type: NumericConstant		Location: ./example_programs/correct.c:8:10		Value: 30
+Type: Punctuator		Location: ./example_programs/correct.c:8:12		Value: ]
+Type: Punctuator		Location: ./example_programs/correct.c:8:14		Value: =
+Type: StringLiteral		Location: ./example_programs/correct.c:8:16		Value: This is a string literal.\n
+Type: Punctuator		Location: ./example_programs/correct.c:8:45		Value: ;
+Type: KeyWord		Location: ./example_programs/correct.c:11:1		Value: int
+Type: Identifier		Location: ./example_programs/correct.c:11:5		Value: main
+Type: Punctuator		Location: ./example_programs/correct.c:11:9		Value: (
+Type: KeyWord		Location: ./example_programs/correct.c:11:10		Value: int
+Type: Identifier		Location: ./example_programs/correct.c:11:14		Value: argc
+Type: Punctuator		Location: ./example_programs/correct.c:11:18		Value: ,
+Type: KeyWord		Location: ./example_programs/correct.c:11:20		Value: char
+Type: Punctuator		Location: ./example_programs/correct.c:11:25		Value: *
+Type: Identifier		Location: ./example_programs/correct.c:11:26		Value: argv
+Type: Punctuator		Location: ./example_programs/correct.c:11:30		Value: [
+Type: Punctuator		Location: ./example_programs/correct.c:11:31		Value: ]
+Type: Punctuator		Location: ./example_programs/correct.c:11:32		Value: )
+Type: Punctuator		Location: ./example_programs/correct.c:12:1		Value: {
+Type: KeyWord		Location: ./example_programs/correct.c:15:5		Value: unsigned
+Type: KeyWord		Location: ./example_programs/correct.c:15:14		Value: long
+Type: KeyWord		Location: ./example_programs/correct.c:15:19		Value: long
+Type: Identifier		Location: ./example_programs/correct.c:15:24		Value: a
+Type: Punctuator		Location: ./example_programs/correct.c:15:26		Value: =
+Type: NumericConstant		Location: ./example_programs/correct.c:15:28		Value: 114514Ull
+Type: Punctuator		Location: ./example_programs/correct.c:15:37		Value: ;
+Type: KeyWord		Location: ./example_programs/correct.c:16:5		Value: double
+Type: Identifier		Location: ./example_programs/correct.c:16:12		Value: b
+Type: Punctuator		Location: ./example_programs/correct.c:16:14		Value: =
+Type: NumericConstant		Location: ./example_programs/correct.c:16:16		Value: .24e+10f
+Type: Punctuator		Location: ./example_programs/correct.c:16:24		Value: ;
+Type: NumericConstant		Location: ./example_programs/correct.c:17:5		Value: 2222
+Type: Punctuator		Location: ./example_programs/correct.c:17:9		Value: ;
+Type: NumericConstant		Location: ./example_programs/correct.c:18:5		Value: 0x3d.11p+9
+Type: Punctuator		Location: ./example_programs/correct.c:18:15		Value: ;
+Type: KeyWord		Location: ./example_programs/correct.c:19:5		Value: int
+Type: Identifier		Location: ./example_programs/correct.c:19:9		Value: a
+Type: Punctuator		Location: ./example_programs/correct.c:19:11		Value: =
+Type: NumericConstant		Location: ./example_programs/correct.c:19:13		Value: 3
+Type: Punctuator		Location: ./example_programs/correct.c:19:14		Value: ;
+Type: KeyWord		Location: ./example_programs/correct.c:20:5		Value: double
+Type: Identifier		Location: ./example_programs/correct.c:20:12		Value: c
+Type: Punctuator		Location: ./example_programs/correct.c:20:14		Value: =
+Type: NumericConstant		Location: ./example_programs/correct.c:20:16		Value: 0xab.cdp+18f
+Type: Punctuator		Location: ./example_programs/correct.c:20:28		Value: ;
+Type: Identifier		Location: ./example_programs/correct.c:21:5		Value: __uint128_t
+Type: Identifier		Location: ./example_programs/correct.c:21:17		Value: c
+Type: Punctuator		Location: ./example_programs/correct.c:21:19		Value: =
+Type: Punctuator		Location: ./example_programs/correct.c:21:21		Value: ++
+Type: Identifier		Location: ./example_programs/correct.c:21:23		Value: a
+Type: Punctuator		Location: ./example_programs/correct.c:21:24		Value: ;
+Type: Identifier		Location: ./example_programs/correct.c:22:5		Value: a
+Type: Punctuator		Location: ./example_programs/correct.c:22:7		Value: >>
+Type: NumericConstant		Location: ./example_programs/correct.c:22:10		Value: 4
+Type: Punctuator		Location: ./example_programs/correct.c:22:11		Value: ;
+Type: KeyWord		Location: ./example_programs/correct.c:23:5		Value: return
+Type: NumericConstant		Location: ./example_programs/correct.c:23:12		Value: 0
+Type: Punctuator		Location: ./example_programs/correct.c:23:13		Value: ;
+Type: Punctuator		Location: ./example_programs/correct.c:24:1		Value: }
+File info:
+File name:	./example_programs/correct.c
+Total chars:	466
+Total lines:	26
+KeyWord:	11
+Identifier:	12
+FaultyIdentifier:	0
+NumericConstant:	9
+NumericConstant(Error Detected):	0
+CharacterConstant:	0
+StringLiteral:	1
+Punctuator:	28
+PreprocessingDirective:	2
+EndOfFile:	0
+Unknown:	0
