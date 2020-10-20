@@ -2,14 +2,14 @@
 #define NAIVELEX_TOKEN_H
 
 #include <string>
-#include <ostream>
+#include <iostream>
 #include <utility>
 #include <cassert>
 
 // ISO C N2176 Section 6.4
 enum class TokenType {
     Keyword, Identifier, NumericConstant, NumericConstantWithError, CharacterConstant,
-    StringLiteral ,Punctuator, PreprocessingDirective, EndOfFile, Unknown
+    StringLiteral ,Punctuator, PreprocessingDirective, EndOfFile, Unknown, FaultyIdentifier
 };
 
 // 6.4.1
@@ -59,33 +59,58 @@ class Token {
 
     KeyWord keyword_;
     Punctuator punctuator_;
-    std::string  literalValue_;        
+    std::string literalValue_;
+    std::string redundant_part_;        
 public:
-    Token(TokenType token_type, TokenLoc token_loc, KeyWord keyword, Punctuator punctuator, std::string literalValue)
+    Token(TokenType token_type, TokenLoc token_loc, KeyWord keyword, Punctuator punctuator, std::string literalValue, std::string redundant_part)
     {
         token_type_ = token_type;
         token_loc_ = std::move(token_loc);
         keyword_ = keyword;
         punctuator_ = punctuator;
         literalValue_ = std::move(literalValue); 
+        redundant_part_ = std::move(redundant_part);
     }
 
     Token(TokenType token_type, const TokenLoc& token_loc, KeyWord keyword) :
-            Token(token_type, token_loc, keyword, Punctuator::None, ""){
+            Token(token_type, token_loc, keyword, Punctuator::None, "", ""){
         assert(token_type == TokenType::Keyword);
     }
 
     Token(TokenType token_type, TokenLoc token_loc, Punctuator punctuator) :
-            Token(token_type, std::move(token_loc), KeyWord::None, punctuator, "") {
+            Token(token_type, std::move(token_loc), KeyWord::None, punctuator, "", ""){
         assert(token_type == TokenType::Punctuator);
     }
 
-    Token(TokenType token_type, TokenLoc token_loc, std::string literalValue) :
-            Token(token_type, std::move(token_loc), KeyWord::None, Punctuator::None, std::move(literalValue)){
-        assert(token_type != TokenType::Keyword && token_type != TokenType::Punctuator);
+    Token(TokenType token_type, TokenLoc token_loc, std::string literalValue, std::string redundant_part) :
+            Token(token_type, std::move(token_loc), KeyWord::None, Punctuator::None, std::move(literalValue), std::move(redundant_part)){
+        assert(token_type == TokenType::NumericConstantWithError || token_type == TokenType::FaultyIdentifier);
+        if(token_type == TokenType::FaultyIdentifier)
+        {
+            std::string temp = literalValue_ + redundant_part_;
+            literalValue_.clear();
+            redundant_part_.clear();
+            int first_legal_loc;
+            for(int i = 0; i < temp.length(); i++)
+            {
+                if(temp[i] == '_' || isalpha(temp[i]))
+                {
+                    first_legal_loc = i;
+                    break;
+                }
+            }
+            redundant_part_ = temp.substr(0, first_legal_loc);
+            literalValue_ = temp.substr(first_legal_loc, temp.length());
+        }
     }
 
-    Token() : Token(TokenType::Unknown, TokenLoc(), KeyWord::None, Punctuator::None, "") {}
+    Token(TokenType token_type, TokenLoc token_loc, std::string literalValue) :
+            Token(token_type, std::move(token_loc), KeyWord::None, Punctuator::None, std::move(literalValue), ""){
+        assert(token_type != TokenType::Keyword && token_type != TokenType::Punctuator \
+                && token_type != TokenType::NumericConstantWithError && token_type != TokenType::FaultyIdentifier);
+    }
+
+    Token() : Token(TokenType::Unknown, TokenLoc(), KeyWord::None, Punctuator::None, "", "") {}
 
     TokenType getTokenType()            const {     return token_type_;        }
     TokenLoc getTokenLoc()              const {     return token_loc_;    }
@@ -101,6 +126,7 @@ public:
 class Counter {
     size_t count_keyword;
     size_t count_identifier;
+    size_t count_faulty_identifier;
     size_t count_numeric_constant;
     size_t count_numeric_constant_with_error;
     size_t count_character_constant;
@@ -115,6 +141,7 @@ public:
     size_t get_keyword() const                      {   return  count_keyword; }
     size_t get_numeric_constant() const             {   return  count_numeric_constant; }
     size_t get_identifier() const                   {   return  count_identifier; }
+    size_t get_faulty_identifier() const            {   return  count_faulty_identifier; }
     size_t get_numeric_constantWithError() const    {   return  count_numeric_constant_with_error; }
     size_t get_character_constant() const           {   return  count_character_constant; }
     size_t get_string_literal() const               {   return  count_string_literal; }

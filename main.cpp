@@ -36,11 +36,13 @@ int main(int argc, char** argv) {
         std::cout.rdbuf(out.rdbuf());
     }
     std::cout << "Tokens:" << std::endl;
-    Token tok = lex_op.getNextToken();
+    TokenType prev_type = (TokenType)0;
+    Token tok = lex_op.getNextToken(prev_type);
     while(tok.getTokenType() != TokenType::EndOfFile) {
         std::cout << tok << std::endl;
         counter.update(tok);
-        tok = lex_op.getNextToken();
+        prev_type = tok.getTokenType();
+        tok = lex_op.getNextToken(prev_type);
     }
     std::cout << "File info:" << std::endl;
     std::cout << "File name:\t" << lex_op.getSrcName() << std::endl;
