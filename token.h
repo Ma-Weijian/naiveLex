@@ -95,8 +95,8 @@ public:
             std::string temp = literalValue_ + redundant_part_;
             literalValue_.clear();
             redundant_part_.clear();
-            int first_legal_loc;
-            for(int i = 0; i < temp.length(); i++)
+            size_t first_legal_loc;
+            for(size_t i = 0; i < temp.length(); i++)
             {
                 if(temp[i] == '_' || isalpha(temp[i]))
                 {
