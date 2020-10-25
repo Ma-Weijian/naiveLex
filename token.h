@@ -37,6 +37,7 @@ class TokenLoc {
     size_t colCount;
     size_t lineCount;
 public:
+    //different constructors
     TokenLoc()
     {
         fileName = "UNKNOWN";
@@ -49,6 +50,7 @@ public:
         colCount = col; 
         lineCount = line; 
     }
+    //entrance to obtain private data members
     size_t getColCount()    const {    return colCount;    }
     std::string toStr()  const {    return fileName + ":" + std::to_string(lineCount) + ":" + std::to_string(colCount);   }
 };
@@ -62,6 +64,7 @@ class Token {
     std::string literalValue_;
     std::string redundant_part_;        
 public:
+    //the real constructor
     Token(TokenType token_type, TokenLoc token_loc, KeyWord keyword, Punctuator punctuator, std::string literalValue, std::string redundant_part)
     {
         token_type_ = token_type;
@@ -72,6 +75,7 @@ public:
         redundant_part_ = std::move(redundant_part);
     }
 
+    //other constructors that will be rewritten to the real constructor
     Token(TokenType token_type, const TokenLoc& token_loc, KeyWord keyword) :
             Token(token_type, token_loc, keyword, Punctuator::None, "", ""){
         assert(token_type == TokenType::Keyword);
@@ -82,6 +86,7 @@ public:
         assert(token_type == TokenType::Punctuator);
     }
 
+    //constructor with error type
     Token(TokenType token_type, TokenLoc token_loc, std::string literalValue, std::string redundant_part) :
             Token(token_type, std::move(token_loc), KeyWord::None, Punctuator::None, std::move(literalValue), std::move(redundant_part)){
         assert(token_type == TokenType::NumericConstantWithError || token_type == TokenType::FaultyIdentifier);
@@ -112,12 +117,14 @@ public:
 
     Token() : Token(TokenType::Unknown, TokenLoc(), KeyWord::None, Punctuator::None, "", "") {}
 
+    //get private data members
     TokenType getTokenType()            const {     return token_type_;        }
     TokenLoc getTokenLoc()              const {     return token_loc_;    }
     KeyWord getKeyWord()                const {     return keyword_;          }
     Punctuator getPunctuator()          const {     return punctuator_;       }
     std::string getLiteralValue()       const {     return literalValue_;     }
 
+    //output handler
     std::string toStr() const;
     friend std::ostream& operator<<(std::ostream& os, const Token & token);
 };
@@ -136,8 +143,12 @@ class Counter {
     size_t count_EOF;
     size_t count_unknown;
 public:
+    //to update statistics after eating another token
     void update(const Token& token);
+    //output handler
     friend std::ostream& operator<<(std::ostream& os, const Counter & counter);
+
+    //entrance to private data members
     size_t get_keyword() const                      {   return  count_keyword; }
     size_t get_numeric_constant() const             {   return  count_numeric_constant; }
     size_t get_identifier() const                   {   return  count_identifier; }
