@@ -16,7 +16,7 @@ class naiveLex {
     Token get_next_preprocessing_directive_token();
     FileWrapper fileWrapper_;
     TokenLoc currentLocation_;
-    std::string tokenBuffer_;
+    std::string token_buffer_;
 public:
     explicit naiveLex(const std::string& fileName) : fileWrapper_{fileName} {}
     Token getNextToken(TokenType prev_type);

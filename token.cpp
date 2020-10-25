@@ -1,5 +1,6 @@
 #include "token.h"
 
+//A supportive function which converts the token into std::string
 const char *toTokenString(TokenType token_type) {
     switch (token_type) {
         case TokenType::Keyword:                    return "KeyWord";
@@ -17,57 +18,36 @@ const char *toTokenString(TokenType token_type) {
     };
 }
 
+//A supportive function which converts the keyword into std::string
 const char *toKeywordString(KeyWord keyword) {
     switch (keyword) {
-        case KeyWord::Auto:         return "auto";
-        case KeyWord::Break:        return "break";
-        case KeyWord::Case:         return "case";
-        case KeyWord::Char:         return "char";
-        case KeyWord::Const:        return "const";
-        case KeyWord::Continue:     return "continue";
-        case KeyWord::Default:      return "default";
-        case KeyWord::Do:           return "do";
-        case KeyWord::Double:       return "double";
-        case KeyWord::Else:         return "else";
-        case KeyWord::Enum:         return "enum";
-        case KeyWord::Extern:       return "extern";
-        case KeyWord::Float:        return "float";
-        case KeyWord::For:          return "for";
-        case KeyWord::Goto:         return "goto";
-        case KeyWord::If:           return "if";
-        case KeyWord::Inline:       return "inline";
-        case KeyWord::Int:          return "int";
-        case KeyWord::Long:         return "long";
-        case KeyWord::Register:     return "register";
-        case KeyWord::Restrict:     return "restrict";
-        case KeyWord::Return:       return "return";
-        case KeyWord::Short:        return "short";
-        case KeyWord::Signed:       return "signed";
-        case KeyWord::Sizeof:       return "sizeof";
-        case KeyWord::Static:       return "static";
-        case KeyWord::Struct:       return "struct";
-        case KeyWord::Switch:       return "switch";
-        case KeyWord::Typedef:      return "typedef";
-        case KeyWord::Union:        return "union";
-        case KeyWord::Unsigned:     return "unsigned";
-        case KeyWord::Void:         return "void";
-        case KeyWord::Volatile:     return "volatile";
-        case KeyWord::While:        return "while";
-        case KeyWord::Alignas:      return "alignas";
-        case KeyWord::Alignof:      return "alignof";
-        case KeyWord::Atomic:       return "atomic";
-        case KeyWord::Bool:         return "bool";
-        case KeyWord::Complex:      return "complex";
-        case KeyWord::Generic:      return "generic";
-        case KeyWord::Imaginary:    return "imaginary";
-        case KeyWord::Noreturn:     return "noreturn";
-        case KeyWord::StaticAssert: return "staticAssert";
-        case KeyWord::ThreadLocal:  return "threadLocal";
-        case KeyWord::None:         return "none";
-        default:                    return "unknown";
+        case KeyWord::Auto:         return "auto";          case KeyWord::Break:        return "break";
+        case KeyWord::Case:         return "case";          case KeyWord::Char:         return "char";
+        case KeyWord::Const:        return "const";         case KeyWord::Continue:     return "continue";
+        case KeyWord::Default:      return "default";       case KeyWord::Do:           return "do";
+        case KeyWord::Double:       return "double";        case KeyWord::Else:         return "else";
+        case KeyWord::Enum:         return "enum";          case KeyWord::Extern:       return "extern";
+        case KeyWord::Float:        return "float";         case KeyWord::For:          return "for";
+        case KeyWord::Goto:         return "goto";          case KeyWord::If:           return "if";
+        case KeyWord::Inline:       return "inline";        case KeyWord::Int:          return "int";
+        case KeyWord::Long:         return "long";          case KeyWord::Register:     return "register";
+        case KeyWord::Restrict:     return "restrict";      case KeyWord::Return:       return "return";
+        case KeyWord::Short:        return "short";         case KeyWord::Signed:       return "signed";
+        case KeyWord::Sizeof:       return "sizeof";        case KeyWord::Static:       return "static";
+        case KeyWord::Struct:       return "struct";        case KeyWord::Switch:       return "switch";
+        case KeyWord::Typedef:      return "typedef";       case KeyWord::Union:        return "union";
+        case KeyWord::Unsigned:     return "unsigned";      case KeyWord::Void:         return "void";
+        case KeyWord::Volatile:     return "volatile";      case KeyWord::While:        return "while";
+        case KeyWord::Alignas:      return "alignas";       case KeyWord::Alignof:      return "alignof";
+        case KeyWord::Atomic:       return "atomic";        case KeyWord::Bool:         return "bool";
+        case KeyWord::Complex:      return "complex";       case KeyWord::Generic:      return "generic";
+        case KeyWord::Imaginary:    return "imaginary";     case KeyWord::Noreturn:     return "noreturn";
+        case KeyWord::StaticAssert: return "staticAssert";  case KeyWord::ThreadLocal:  return "threadLocal";
+        case KeyWord::None:         return "none";          default:                    return "unknown";
     }
 }
 
+//A supportive function which converts the punctuator into std::string
 const char *toPunctuatorString(Punctuator punctuator) {
     switch (punctuator) {
         case Punctuator::Question:              return "?";
@@ -100,6 +80,7 @@ const char *toPunctuatorString(Punctuator punctuator) {
     }
 }
 
+//ouput different things for different types
 std::string Token::toStr() const {
     std::string result;
     result += "Type: ";
@@ -145,6 +126,7 @@ std::string Token::toStr() const {
     return result;
 }
 
+//a wrapper to push the output string  into output stream
 std::ostream& operator<<(std::ostream& os, const Token & token) {
     os << token.toStr();
     return os;

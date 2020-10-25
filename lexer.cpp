@@ -3,7 +3,7 @@
 Token naiveLex::getNextToken(TokenType prev_type) 
 {
     /* refresh the bufffer. */
-    tokenBuffer_.clear();
+    token_buffer_.clear();
     /* means it has reached the end. */
     if(fileWrapper_.eof())
         return Token(TokenType::EndOfFile, fileWrapper_.getLocation(), "");
@@ -20,6 +20,62 @@ Token naiveLex::getNextToken(TokenType prev_type)
     currentLocation_ = fileWrapper_.getLocation();
     switch (c) 
     {
+        //numbers
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
+            token_buffer_.push_back(c);
+            return get_next_numeric_token(prev_type);
+        //special alphabets which can mean both identifiers, numbers or string literals
+        case 'L':
+        case 'U':
+            if(fileWrapper_.peekChar(1) == '\"') 
+            {
+                fileWrapper_.eatChars(1);
+                return get_next_string_literial_token();
+            } 
+            else if(fileWrapper_.peekChar(1) == '\'') 
+            {
+                fileWrapper_.eatChars(1);
+                return get_next_character_constant_token();
+            } 
+            else 
+            {
+                token_buffer_.push_back(c);
+                return get_next_identifier_token();
+            }
+        case 'u':
+            if(fileWrapper_.peekChar(1) == '\"') 
+            {
+                fileWrapper_.eatChars(1);
+                return get_next_string_literial_token();
+            } 
+            else if(fileWrapper_.peekChar(1) == '\'') 
+            {
+                fileWrapper_.eatChars(1);
+                return get_next_character_constant_token();
+            } 
+            else if((fileWrapper_.peekChar(1) == '8') && fileWrapper_.peekChar(2) == '\"') 
+            {
+                fileWrapper_.eatChars(2);
+                return get_next_string_literial_token();
+            } 
+            else 
+            {
+                token_buffer_.push_back(c);
+                return get_next_identifier_token();
+            }
+        //possible beginners of identifiers
+        case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G':
+        case 'H': case 'I': case 'J': case 'K': /*'L'*/   case 'M': case 'N':
+        case 'O': case 'P': case 'Q': case 'R': case 'S': case 'T':    /*'U'*/
+        case 'V': case 'W': case 'X': case 'Y': case 'Z':
+        case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':
+        case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n':
+        case 'o': case 'p': case 'q': case 'r': case 's': case 't':    /*'u'*/
+        case 'v': case 'w': case 'x': case 'y': case 'z':
+        case '_':
+            token_buffer_.push_back(c);
+            return get_next_identifier_token();
         // Punctuators
         case '[':               return Token(TokenType::Punctuator, currentLocation_, Punctuator::LSquare);
         case ']':               return Token(TokenType::Punctuator, currentLocation_, Punctuator::RSquare);
@@ -35,7 +91,7 @@ Token naiveLex::getNextToken(TokenType prev_type)
             } 
             else if(isdigit(fileWrapper_.peekChar(1)))
             {
-                tokenBuffer_.push_back(c);
+                token_buffer_.push_back(c);
                 return get_next_numeric_token(prev_type);                                        //.85e+8
             }
             else
@@ -257,64 +313,11 @@ Token naiveLex::getNextToken(TokenType prev_type)
             return get_next_string_literial_token();
         case '\'':
             return get_next_character_constant_token();
-        case '0': case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
-            tokenBuffer_.push_back(c);
-            return get_next_numeric_token(prev_type);
-        case 'L':
-        case 'U':
-            if(fileWrapper_.peekChar(1) == '\"') 
-            {
-                fileWrapper_.eatChars(1);
-                return get_next_string_literial_token();
-            } 
-            else if(fileWrapper_.peekChar(1) == '\'') 
-            {
-                fileWrapper_.eatChars(1);
-                return get_next_character_constant_token();
-            } 
-            else 
-            {
-                tokenBuffer_.push_back(c);
-                return get_next_identifier_token();
-            }
-        case 'u':
-            if(fileWrapper_.peekChar(1) == '\"') 
-            {
-                fileWrapper_.eatChars(1);
-                return get_next_string_literial_token();
-            } 
-            else if(fileWrapper_.peekChar(1) == '\'') 
-            {
-                fileWrapper_.eatChars(1);
-                return get_next_character_constant_token();
-            } 
-            else if((fileWrapper_.peekChar(1) == '8') && fileWrapper_.peekChar(2) == '\"') 
-            {
-                fileWrapper_.eatChars(2);
-                return get_next_string_literial_token();
-            } 
-            else 
-            {
-                tokenBuffer_.push_back(c);
-                return get_next_identifier_token();
-            }
-        case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G':
-        case 'H': case 'I': case 'J': case 'K': /*'L'*/   case 'M': case 'N':
-        case 'O': case 'P': case 'Q': case 'R': case 'S': case 'T':    /*'U'*/
-        case 'V': case 'W': case 'X': case 'Y': case 'Z':
-        case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':
-        case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n':
-        case 'o': case 'p': case 'q': case 'r': case 's': case 't':    /*'u'*/
-        case 'v': case 'w': case 'x': case 'y': case 'z':
-        case '_':
-            tokenBuffer_.push_back(c);
-            return get_next_identifier_token();
         default:
-            tokenBuffer_.push_back(c);
+            token_buffer_.push_back(c);
             break;
     }
-    auto result = Token(TokenType::Unknown, fileWrapper_.getLocation(), tokenBuffer_);
+    auto result = Token(TokenType::Unknown, fileWrapper_.getLocation(), token_buffer_);
     return result;
 }
 
@@ -324,9 +327,9 @@ Token naiveLex::get_next_preprocessing_directive_token()
     while(!fileWrapper_.eof() && (fileWrapper_.peekChar(1) != '\n' || c == '\\')) 
     {
         c = fileWrapper_.getNextChar();
-        tokenBuffer_.push_back(c);
+        token_buffer_.push_back(c);
     }
-    return Token(TokenType::PreprocessingDirective, currentLocation_, tokenBuffer_);
+    return Token(TokenType::PreprocessingDirective, currentLocation_, token_buffer_);
 }
 
 void naiveLex::skip_line_comment() 
@@ -382,9 +385,9 @@ Token naiveLex::get_next_numeric_token(TokenType prev_type)
                 fileWrapper_.peekChar(1) == 'p' || fileWrapper_.peekChar(1) == 'P') &&          //we should get one more char at this case.
                 (fileWrapper_.peekChar(2) == '+' || fileWrapper_.peekChar(2) == '-')) 
                 {
-                    tokenBuffer_.push_back(fileWrapper_.getNextChar());
+                    token_buffer_.push_back(fileWrapper_.getNextChar());
                 }
-        tokenBuffer_.push_back(fileWrapper_.getNextChar());
+        token_buffer_.push_back(fileWrapper_.getNextChar());
     }
 
     std::string faulty_suffix;
@@ -394,19 +397,19 @@ Token naiveLex::get_next_numeric_token(TokenType prev_type)
     }
      
     size_t offset;
-    std::stof(tokenBuffer_, &offset);
-    if(offset == tokenBuffer_.size() ||
-        (offset + 1 == tokenBuffer_.size() && isPermittedNumericSuffix(tokenBuffer_.at(offset))) ||
-            (offset + 2 == tokenBuffer_.size() && isPermittedNumericSuffix(tokenBuffer_.at(offset), tokenBuffer_.at(offset + 1))) ||
-                (offset + 3 == tokenBuffer_.size() && isPermittedNumericSuffix(tokenBuffer_.at(offset), tokenBuffer_.at(offset + 1), tokenBuffer_.at(offset + 2)))) 
+    std::stof(token_buffer_, &offset);
+    if(offset == token_buffer_.size() ||
+        (offset + 1 == token_buffer_.size() && isPermittedNumericSuffix(token_buffer_.at(offset))) ||
+            (offset + 2 == token_buffer_.size() && isPermittedNumericSuffix(token_buffer_.at(offset), token_buffer_.at(offset + 1))) ||
+                (offset + 3 == token_buffer_.size() && isPermittedNumericSuffix(token_buffer_.at(offset), token_buffer_.at(offset + 1), token_buffer_.at(offset + 2)))) 
                 {
                     if(faulty_suffix.empty())
-                        return Token(TokenType::NumericConstant, currentLocation_, tokenBuffer_);
+                        return Token(TokenType::NumericConstant, currentLocation_, token_buffer_);
                 }
     if(prev_type == TokenType::Keyword)
-        return Token(TokenType::FaultyIdentifier, currentLocation_, tokenBuffer_, faulty_suffix);      //We first move them in and do the handling later.
+        return Token(TokenType::FaultyIdentifier, currentLocation_, token_buffer_, faulty_suffix);      //We first move them in and do the handling later.
     else
-        return Token(TokenType::NumericConstantWithError, currentLocation_, tokenBuffer_, faulty_suffix);
+        return Token(TokenType::NumericConstantWithError, currentLocation_, token_buffer_, faulty_suffix);
 }
 
 /* We scan until the next \" */
@@ -415,9 +418,9 @@ Token naiveLex::get_next_string_literial_token()
     char c;
     while(!fileWrapper_.eof() && (c = fileWrapper_.getNextChar()) != '\"') 
     {
-        tokenBuffer_.push_back(c);
+        token_buffer_.push_back(c);
     }
-    return Token(TokenType::StringLiteral, currentLocation_, tokenBuffer_);
+    return Token(TokenType::StringLiteral, currentLocation_, token_buffer_);
 }
 
 Token naiveLex::get_next_character_constant_token() 
@@ -425,9 +428,9 @@ Token naiveLex::get_next_character_constant_token()
     char c;
     while(!fileWrapper_.eof() && (c = fileWrapper_.getNextChar()) != '\'') 
     {
-        tokenBuffer_.push_back(c);
+        token_buffer_.push_back(c);
     }
-    return Token(TokenType::CharacterConstant, currentLocation_, tokenBuffer_);
+    return Token(TokenType::CharacterConstant, currentLocation_, token_buffer_);
 }
 
 bool isPermittedChar(const char c) 
@@ -439,52 +442,52 @@ Token naiveLex::get_next_identifier_token()
 {
     while(!fileWrapper_.eof() && isPermittedChar(fileWrapper_.peekChar(1))) 
     {
-        tokenBuffer_.push_back(fileWrapper_.getNextChar());
+        token_buffer_.push_back(fileWrapper_.getNextChar());
     }
-    if(tokenBuffer_ == "auto")                      return Token(TokenType::Keyword, currentLocation_, KeyWord::Auto);
-    else if(tokenBuffer_ == "break")                return Token(TokenType::Keyword, currentLocation_, KeyWord::Break);
-    else if(tokenBuffer_ == "case")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Case);
-    else if(tokenBuffer_ == "char")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Char);
-    else if(tokenBuffer_ == "const")                return Token(TokenType::Keyword, currentLocation_, KeyWord::Const);
-    else if(tokenBuffer_ == "continue")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Continue);
-    else if(tokenBuffer_ == "default")              return Token(TokenType::Keyword, currentLocation_, KeyWord::Default);
-    else if(tokenBuffer_ == "do")                   return Token(TokenType::Keyword, currentLocation_, KeyWord::Do);
-    else if(tokenBuffer_ == "double")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Double);
-    else if(tokenBuffer_ == "else")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Else);
-    else if(tokenBuffer_ == "enum")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Enum);
-    else if(tokenBuffer_ == "extern")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Extern);
-    else if(tokenBuffer_ == "float")                return Token(TokenType::Keyword, currentLocation_, KeyWord::Float);
-    else if(tokenBuffer_ == "for")                  return Token(TokenType::Keyword, currentLocation_, KeyWord::For);
-    else if(tokenBuffer_ == "goto")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Goto);
-    else if(tokenBuffer_ == "if")                   return Token(TokenType::Keyword, currentLocation_, KeyWord::If);
-    else if(tokenBuffer_ == "inline")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Inline);
-    else if(tokenBuffer_ == "int")                  return Token(TokenType::Keyword, currentLocation_, KeyWord::Int);
-    else if(tokenBuffer_ == "long")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Long);
-    else if(tokenBuffer_ == "register")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Register);
-    else if(tokenBuffer_ == "restrict")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Restrict);
-    else if(tokenBuffer_ == "return")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Return);
-    else if(tokenBuffer_ == "short")                return Token(TokenType::Keyword, currentLocation_, KeyWord::Short);
-    else if(tokenBuffer_ == "signed")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Signed);
-    else if(tokenBuffer_ == "sizeof")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Sizeof);
-    else if(tokenBuffer_ == "static")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Static);
-    else if(tokenBuffer_ == "struct")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Struct);
-    else if(tokenBuffer_ == "switch")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Switch);
-    else if(tokenBuffer_ == "typeof")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Typedef);
-    else if(tokenBuffer_ == "union")                return Token(TokenType::Keyword, currentLocation_, KeyWord::Union);
-    else if(tokenBuffer_ == "unsigned")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Unsigned);
-    else if(tokenBuffer_ == "void")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Void);
-    else if(tokenBuffer_ == "volatile")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Volatile);
-    else if(tokenBuffer_ == "while")                return Token(TokenType::Keyword, currentLocation_, KeyWord::While);
-    else if(tokenBuffer_ == "_Alignas")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Alignas);
-    else if(tokenBuffer_ == "_Alignof")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Alignof);
-    else if(tokenBuffer_ == "_Atomic")              return Token(TokenType::Keyword, currentLocation_, KeyWord::Atomic);
-    else if(tokenBuffer_ == "_Bool")                return Token(TokenType::Keyword, currentLocation_, KeyWord::Bool);
-    else if(tokenBuffer_ == "_Complex")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Complex);
-    else if(tokenBuffer_ == "_Generic")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Generic);
-    else if(tokenBuffer_ == "_Imaginary")           return Token(TokenType::Keyword, currentLocation_, KeyWord::Imaginary);
-    else if(tokenBuffer_ == "_Noreturn")            return Token(TokenType::Keyword, currentLocation_, KeyWord::Noreturn);
-    else if(tokenBuffer_ == "_Static_assert")       return Token(TokenType::Keyword, currentLocation_, KeyWord::StaticAssert);
-    else if(tokenBuffer_ == "_Thread_local")        return Token(TokenType::Keyword, currentLocation_, KeyWord::ThreadLocal);
-    else if(tokenBuffer_ == "None")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::None);
-    return Token(TokenType::Identifier, currentLocation_, tokenBuffer_);
+    if(token_buffer_ == "auto")                      return Token(TokenType::Keyword, currentLocation_, KeyWord::Auto);
+    else if(token_buffer_ == "break")                return Token(TokenType::Keyword, currentLocation_, KeyWord::Break);
+    else if(token_buffer_ == "case")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Case);
+    else if(token_buffer_ == "char")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Char);
+    else if(token_buffer_ == "const")                return Token(TokenType::Keyword, currentLocation_, KeyWord::Const);
+    else if(token_buffer_ == "continue")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Continue);
+    else if(token_buffer_ == "default")              return Token(TokenType::Keyword, currentLocation_, KeyWord::Default);
+    else if(token_buffer_ == "do")                   return Token(TokenType::Keyword, currentLocation_, KeyWord::Do);
+    else if(token_buffer_ == "double")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Double);
+    else if(token_buffer_ == "else")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Else);
+    else if(token_buffer_ == "enum")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Enum);
+    else if(token_buffer_ == "extern")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Extern);
+    else if(token_buffer_ == "float")                return Token(TokenType::Keyword, currentLocation_, KeyWord::Float);
+    else if(token_buffer_ == "for")                  return Token(TokenType::Keyword, currentLocation_, KeyWord::For);
+    else if(token_buffer_ == "goto")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Goto);
+    else if(token_buffer_ == "if")                   return Token(TokenType::Keyword, currentLocation_, KeyWord::If);
+    else if(token_buffer_ == "inline")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Inline);
+    else if(token_buffer_ == "int")                  return Token(TokenType::Keyword, currentLocation_, KeyWord::Int);
+    else if(token_buffer_ == "long")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Long);
+    else if(token_buffer_ == "register")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Register);
+    else if(token_buffer_ == "restrict")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Restrict);
+    else if(token_buffer_ == "return")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Return);
+    else if(token_buffer_ == "short")                return Token(TokenType::Keyword, currentLocation_, KeyWord::Short);
+    else if(token_buffer_ == "signed")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Signed);
+    else if(token_buffer_ == "sizeof")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Sizeof);
+    else if(token_buffer_ == "static")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Static);
+    else if(token_buffer_ == "struct")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Struct);
+    else if(token_buffer_ == "switch")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Switch);
+    else if(token_buffer_ == "typeof")               return Token(TokenType::Keyword, currentLocation_, KeyWord::Typedef);
+    else if(token_buffer_ == "union")                return Token(TokenType::Keyword, currentLocation_, KeyWord::Union);
+    else if(token_buffer_ == "unsigned")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Unsigned);
+    else if(token_buffer_ == "void")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::Void);
+    else if(token_buffer_ == "volatile")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Volatile);
+    else if(token_buffer_ == "while")                return Token(TokenType::Keyword, currentLocation_, KeyWord::While);
+    else if(token_buffer_ == "_Alignas")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Alignas);
+    else if(token_buffer_ == "_Alignof")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Alignof);
+    else if(token_buffer_ == "_Atomic")              return Token(TokenType::Keyword, currentLocation_, KeyWord::Atomic);
+    else if(token_buffer_ == "_Bool")                return Token(TokenType::Keyword, currentLocation_, KeyWord::Bool);
+    else if(token_buffer_ == "_Complex")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Complex);
+    else if(token_buffer_ == "_Generic")             return Token(TokenType::Keyword, currentLocation_, KeyWord::Generic);
+    else if(token_buffer_ == "_Imaginary")           return Token(TokenType::Keyword, currentLocation_, KeyWord::Imaginary);
+    else if(token_buffer_ == "_Noreturn")            return Token(TokenType::Keyword, currentLocation_, KeyWord::Noreturn);
+    else if(token_buffer_ == "_Static_assert")       return Token(TokenType::Keyword, currentLocation_, KeyWord::StaticAssert);
+    else if(token_buffer_ == "_Thread_local")        return Token(TokenType::Keyword, currentLocation_, KeyWord::ThreadLocal);
+    else if(token_buffer_ == "None")                 return Token(TokenType::Keyword, currentLocation_, KeyWord::None);
+    return Token(TokenType::Identifier, currentLocation_, token_buffer_);
 }
